@@ -385,6 +385,107 @@ def _legacy_primary_reason(
     return candidate.evidence[0].reason
 
 
+def _rule_evidence(
+    rule: _CompiledRule,
+    filename: str,
+    parent: str,
+    content: str,
+    *,
+    builtin_content_token_exclusions: frozenset[str],
+) -> tuple[ClassificationEvidence, ...]:
+    """Collect unique, deterministically ordered evidence for one rule."""
+    items = _evidence_for_rule(
+        rule,
+        filename,
+        source=EvidenceSource.FILENAME,
+        builtin_content_token_exclusions=builtin_content_token_exclusions,
+    )
+    if parent:
+        items.extend(
+            _evidence_for_rule(
+                rule,
+                parent,
+                source=EvidenceSource.SOURCE_PATH,
+                builtin_content_token_exclusions=builtin_content_token_exclusions,
+            )
+        )
+    if content:
+        items.extend(
+            _evidence_for_rule(
+                rule,
+                content,
+                source=EvidenceSource.EXTRACTED_CONTENT,
+                builtin_content_token_exclusions=builtin_content_token_exclusions,
+            )
+        )
+
+    unique = {_indicator_identity(item): item for item in items}
+    return tuple(sorted(unique.values(), key=_evidence_order))
+
+
+def _group_rule_evidence(
+    rules: tuple[_CompiledRule, ...],
+    filename: str,
+    parent: str,
+    content: str,
+    *,
+    builtin_content_token_exclusions: frozenset[str],
+) -> dict[tuple[Path, str, ClassificationSource, int], list[ClassificationEvidence]]:
+    """Group deduplicated per-rule evidence by candidate key."""
+    grouped: dict[
+        tuple[Path, str, ClassificationSource, int], list[ClassificationEvidence]
+    ] = {}
+    for rule in rules:
+        ordered = _rule_evidence(
+            rule,
+            filename,
+            parent,
+            content,
+            builtin_content_token_exclusions=builtin_content_token_exclusions,
+        )
+        if ordered:
+            grouped.setdefault(
+                (rule.folder, rule.rule_id, rule.origin, rule.precedence_tier), []
+            ).extend(ordered)
+    return grouped
+
+
+def _rule_taxonomy_priority(
+    rules: tuple[_CompiledRule, ...],
+    rule_id: str,
+    origin: ClassificationSource,
+    tier: int,
+) -> int | None:
+    return next(
+        rule.taxonomy_priority
+        for rule in rules
+        if rule.rule_id == rule_id
+        and rule.origin is origin
+        and rule.precedence_tier == tier
+    )
+
+
+def _build_candidate(
+    rules: tuple[_CompiledRule, ...],
+    key: tuple[Path, str, ClassificationSource, int],
+    items: list[ClassificationEvidence],
+) -> tuple[ClassificationCandidate, int]:
+    folder, rule_id, origin, tier = key
+    unique = {_indicator_identity(item): item for item in items}
+    ordered = tuple(sorted(unique.values(), key=_evidence_order))
+    return (
+        ClassificationCandidate(
+            folder,
+            rule_id,
+            origin,
+            _aggregate_strength(ordered),
+            ordered,
+            _rule_taxonomy_priority(rules, rule_id, origin, tier),
+        ),
+        tier,
+    )
+
+
 def _semantic_candidates(
     path: Path,
     document_text: str,
@@ -392,73 +493,22 @@ def _semantic_candidates(
     *,
     builtin_content_token_exclusions: frozenset[str],
 ) -> tuple[tuple[ClassificationCandidate, int], ...]:
+    """Collect semantic classification candidates from available evidence."""
     filename = _normalize_search_text(path.name)
     parent = (
         _normalize_search_text(" ".join(path.parent.parts)) if path.parent.parts else ""
     )
     content = _prepare_content_search_text(document_text) if document_text else ""
-    grouped: dict[
-        tuple[Path, str, ClassificationSource, int], list[ClassificationEvidence]
-    ] = {}
-    for rule in rules:
-        items = _evidence_for_rule(
-            rule,
-            filename,
-            source=EvidenceSource.FILENAME,
-            builtin_content_token_exclusions=builtin_content_token_exclusions,
-        )
-        if parent:
-            items.extend(
-                _evidence_for_rule(
-                    rule,
-                    parent,
-                    source=EvidenceSource.SOURCE_PATH,
-                    builtin_content_token_exclusions=builtin_content_token_exclusions,
-                )
-            )
-        if content:
-            items.extend(
-                _evidence_for_rule(
-                    rule,
-                    content,
-                    source=EvidenceSource.EXTRACTED_CONTENT,
-                    builtin_content_token_exclusions=builtin_content_token_exclusions,
-                )
-            )
-        unique: dict[
-            tuple[EvidenceSource, MatchMechanism, str], ClassificationEvidence
-        ] = {}
-        for item in items:
-            unique[_indicator_identity(item)] = item
-        ordered = tuple(sorted(unique.values(), key=_evidence_order))
-        if ordered:
-            grouped.setdefault(
-                (rule.folder, rule.rule_id, rule.origin, rule.precedence_tier), []
-            ).extend(ordered)
-    candidates: list[tuple[ClassificationCandidate, int]] = []
-    for (folder, rule_id, origin, tier), items in grouped.items():
-        unique = {_indicator_identity(item): item for item in items}
-        ordered = tuple(sorted(unique.values(), key=_evidence_order))
-        candidates.append(
-            (
-                ClassificationCandidate(
-                    folder,
-                    rule_id,
-                    origin,
-                    _aggregate_strength(ordered),
-                    ordered,
-                    next(
-                        rule.taxonomy_priority
-                        for rule in rules
-                        if rule.rule_id == rule_id
-                        and rule.origin is origin
-                        and rule.precedence_tier == tier
-                    ),
-                ),
-                tier,
-            )
-        )
-    return tuple(candidates)
+    grouped = _group_rule_evidence(
+        rules,
+        filename,
+        parent,
+        content,
+        builtin_content_token_exclusions=builtin_content_token_exclusions,
+    )
+    return tuple(
+        _build_candidate(rules, key, items) for key, items in grouped.items()
+    )
 
 
 def _candidate_score(
