@@ -120,7 +120,7 @@ def inspect_document_text(
                 path,
                 verbose=verbose,
             )
-    except Exception as error:
+    except (OSError, ValueError) as error:
         return DocumentInspectionResult(
             path=path,
             status=DocumentInspectionStatus.FAILED,
