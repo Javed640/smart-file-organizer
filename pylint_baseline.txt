@@ -1,0 +1,138 @@
+************* Module smart_file_organizer.application
+src\smart_file_organizer\application.py:65:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+src\smart_file_organizer\application.py:79:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
+************* Module smart_file_organizer.config
+src\smart_file_organizer\config.py:177:0: R0912: Too many branches (17/12) (too-many-branches)
+************* Module smart_file_organizer.content_planning
+src\smart_file_organizer\content_planning.py:42:0: R0913: Too many arguments (8/5) (too-many-arguments)
+src\smart_file_organizer\content_planning.py:69:0: R0913: Too many arguments (8/5) (too-many-arguments)
+************* Module smart_file_organizer.document_text
+src\smart_file_organizer\document_text.py:12:0: E0401: Unable to import 'pypdf' (import-error)
+src\smart_file_organizer\document_text.py:19:0: R0903: Too few public methods (1/2) (too-few-public-methods)
+src\smart_file_organizer\document_text.py:123:11: W0718: Catching too general exception Exception (broad-exception-caught)
+************* Module smart_file_organizer.evidence
+src\smart_file_organizer\evidence.py:388:0: R0914: Too many local variables (18/15) (too-many-locals)
+src\smart_file_organizer\evidence.py:518:0: R0913: Too many arguments (10/5) (too-many-arguments)
+src\smart_file_organizer\evidence.py:518:0: R0914: Too many local variables (24/15) (too-many-locals)
+src\smart_file_organizer\evidence.py:674:0: R0913: Too many arguments (7/5) (too-many-arguments)
+src\smart_file_organizer\evidence.py:674:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+************* Module smart_file_organizer.execution
+src\smart_file_organizer\execution.py:217:0: R0914: Too many local variables (18/15) (too-many-locals)
+************* Module smart_file_organizer.manifest_models
+src\smart_file_organizer\manifest_models.py:109:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
+src\smart_file_organizer\manifest_models.py:123:0: R0902: Too many instance attributes (9/7) (too-many-instance-attributes)
+************* Module smart_file_organizer.manifest_schema
+src\smart_file_organizer\manifest_schema.py:56:0: R0913: Too many arguments (6/5) (too-many-arguments)
+src\smart_file_organizer\manifest_schema.py:262:0: R0914: Too many local variables (18/15) (too-many-locals)
+************* Module smart_file_organizer.manifest_store
+src\smart_file_organizer\manifest_store.py:27:33: E1101: Module 'os' has no 'O_DIRECTORY' member (no-member)
+src\smart_file_organizer\manifest_store.py:27:50: E1101: Module 'os' has no 'O_NOFOLLOW' member (no-member)
+src\smart_file_organizer\manifest_store.py:28:28: E1101: Module 'os' has no 'O_NOFOLLOW' member (no-member)
+************* Module smart_file_organizer.manifest_verification
+src\smart_file_organizer\manifest_verification.py:27:0: R0902: Too many instance attributes (10/7) (too-many-instance-attributes)
+src\smart_file_organizer\manifest_verification.py:39:4: C0116: Missing function or method docstring (missing-function-docstring)
+src\smart_file_organizer\manifest_verification.py:196:0: R0911: Too many return statements (15/6) (too-many-return-statements)
+src\smart_file_organizer\manifest_verification.py:196:0: R0912: Too many branches (14/12) (too-many-branches)
+************* Module smart_file_organizer.models
+src\smart_file_organizer\models.py:129:0: R0902: Too many instance attributes (9/7) (too-many-instance-attributes)
+src\smart_file_organizer\models.py:182:0: R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
+************* Module smart_file_organizer.planning
+src\smart_file_organizer\planning.py:23:0: R0913: Too many arguments (7/5) (too-many-arguments)
+src\smart_file_organizer\planning.py:46:0: R0913: Too many arguments (8/5) (too-many-arguments)
+src\smart_file_organizer\planning.py:80:0: R0913: Too many arguments (7/5) (too-many-arguments)
+src\smart_file_organizer\planning.py:108:0: R0913: Too many arguments (8/5) (too-many-arguments)
+************* Module smart_file_organizer.recovery_safety
+src\smart_file_organizer\recovery_safety.py:265:0: C0301: Line too long (117/100) (line-too-long)
+src\smart_file_organizer\recovery_safety.py:266:0: C0301: Line too long (121/100) (line-too-long)
+src\smart_file_organizer\recovery_safety.py:271:0: C0301: Line too long (118/100) (line-too-long)
+src\smart_file_organizer\recovery_safety.py:97:0: R0911: Too many return statements (8/6) (too-many-return-statements)
+src\smart_file_organizer\recovery_safety.py:165:0: R0911: Too many return statements (7/6) (too-many-return-statements)
+src\smart_file_organizer\recovery_safety.py:183:0: R0911: Too many return statements (7/6) (too-many-return-statements)
+************* Module smart_file_organizer.semantic_rules
+src\smart_file_organizer\semantic_rules.py:88:0: R0913: Too many arguments (7/5) (too-many-arguments)
+src\smart_file_organizer\semantic_rules.py:115:0: R0913: Too many arguments (7/5) (too-many-arguments)
+************* Module smart_file_organizer.gui.tk_app
+src\smart_file_organizer\gui\tk_app.py:11:0: R0903: Too few public methods (0/2) (too-few-public-methods)
+************* Module smart_file_organizer.gui.__main__
+src\smart_file_organizer\gui\__main__.py:9:8: C0415: Import outside toplevel (smart_file_organizer.gui.tk_app.main) (import-outside-toplevel)
+src\smart_file_organizer\gui\__main__.py:1:0: R0801: Similar lines in 2 files
+==smart_file_organizer.manifest_models:[111:121]
+==smart_file_organizer.models:[184:194]
+    original_path: Path
+    final_path: Path
+    category: FileCategory
+    status: MoveStatus
+    timestamp: datetime
+    error_type: str | None = None
+    error_message: str | None = None
+    identity: IdentityEvidence | None = None
+
+ (duplicate-code)
+src\smart_file_organizer\gui\__main__.py:1:0: R0801: Similar lines in 2 files
+==smart_file_organizer.config:[21:32]
+==smart_file_organizer.models:[245:257]
+    folder: str
+    keywords: tuple[str, ...] = ()
+    patterns: tuple[str, ...] = ()
+    rule_id: str | None = None
+
+    def __post_init__(self) -> None:
+        """Detach a rule from caller-owned indicator collections."""
+        object.__setattr__(self, "keywords", tuple(self.keywords))
+        object.__setattr__(self, "patterns", tuple(self.patterns))
+
+
+# Backward-compatible alias for keyword-only rules passed as tuples in tests. (duplicate-code)
+src\smart_file_organizer\gui\__main__.py:1:0: R0801: Similar lines in 2 files
+==smart_file_organizer.content_planning:[60:80]
+==smart_file_organizer.planning:[37:57]
+        semantic_rules=semantic_rules,
+        fallback_folder=fallback_folder,
+        rule_precedence=rule_precedence,
+        disabled_builtin_rules=disabled_builtin_rules,
+        taxonomy_profile=taxonomy_profile,
+    )
+
+
+def plan_file_with_document_text(
+    source: Path,
+    target_root: Path,
+    document_text: str,
+    *,
+    semantic_rules: Iterable[SemanticFolderRule] | None = None,
+    fallback_folder: str | None = DEFAULT_FALLBACK_FOLDER,
+    rule_precedence: RulePrecedence = "builtins-first",
+    disabled_builtin_rules: Iterable[str] = (),
+    taxonomy_profile: TaxonomyProfileName = TaxonomyProfileName.PERSONAL_IT,
+) -> PlannedMove:
+    """Build a move plan and retain the classification decision.""" (duplicate-code)
+src\smart_file_organizer\gui\__main__.py:1:0: R0801: Similar lines in 2 files
+==smart_file_organizer.content_planning:[122:128]
+==smart_file_organizer.planning:[61:67]
+        semantic_rules=semantic_rules,
+        fallback_folder=fallback_folder,
+        rule_precedence=rule_precedence,
+        disabled_builtin_rules=disabled_builtin_rules,
+        taxonomy_profile=taxonomy_profile,
+    ) (duplicate-code)
+src\smart_file_organizer\gui\__main__.py:1:0: R0801: Similar lines in 2 files
+==smart_file_organizer.planning:[60:66]
+==smart_file_organizer.semantic_rules:[127:133]
+        document_text=document_text,
+        semantic_rules=semantic_rules,
+        fallback_folder=fallback_folder,
+        rule_precedence=rule_precedence,
+        disabled_builtin_rules=disabled_builtin_rules,
+        taxonomy_profile=taxonomy_profile, (duplicate-code)
+src\smart_file_organizer\gui\__main__.py:1:0: R0801: Similar lines in 2 files
+==smart_file_organizer.content_planning:[60:65]
+==smart_file_organizer.semantic_rules:[128:133]
+        semantic_rules=semantic_rules,
+        fallback_folder=fallback_folder,
+        rule_precedence=rule_precedence,
+        disabled_builtin_rules=disabled_builtin_rules,
+        taxonomy_profile=taxonomy_profile, (duplicate-code)
+
+------------------------------------------------------------------
+Your code has been rated at 9.73/10 (previous run: 9.73/10, +0.00)
+
