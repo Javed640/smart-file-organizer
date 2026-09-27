@@ -99,6 +99,29 @@ def _primary_reason(
     reconciliation: MoveReconciliation,
     conflicts: frozenset[Path],
 ) -> RecoverySafetyReason:
+    historical_reason = _historical_refusal(
+        verification,
+        reconciliation,
+        conflicts,
+    )
+    if historical_reason is not None:
+        return historical_reason
+
+    refusal_reason = _evidence_refusal(reconciliation)
+    if refusal_reason is not None:
+        return refusal_reason
+
+    if not _required_safety_demonstrated(reconciliation):
+        return _missing_safety_reason(reconciliation)
+
+    return RecoverySafetyReason.RECOVERY_PRECONDITIONS_VERIFIED
+
+
+def _historical_refusal(
+    verification: ManifestVerification,
+    reconciliation: MoveReconciliation,
+    conflicts: frozenset[Path],
+) -> RecoverySafetyReason | None:
     move = reconciliation.move
     if move.status is not MoveStatus.COMPLETED:
         return RecoverySafetyReason.HISTORICAL_STATE_AMBIGUOUS
@@ -106,7 +129,12 @@ def _primary_reason(
         return RecoverySafetyReason.IDENTITY_UNVERIFIABLE
     if move.original_path in conflicts or move.final_path in conflicts:
         return RecoverySafetyReason.HISTORICAL_STATE_AMBIGUOUS
+    return None
 
+
+def _evidence_refusal(
+    reconciliation: MoveReconciliation,
+) -> RecoverySafetyReason | None:
     observation_reason = _observation_refusal(reconciliation)
     if observation_reason is not None:
         return observation_reason
@@ -119,12 +147,12 @@ def _primary_reason(
     if identity_reason is not None:
         return identity_reason
 
-    if not _required_safety_demonstrated(reconciliation):
-        return _missing_safety_reason(reconciliation)
-    return RecoverySafetyReason.RECOVERY_PRECONDITIONS_VERIFIED
+    return None
 
 
-def _conflicting_manifest_paths(verification: ManifestVerification) -> frozenset[Path]:
+def _conflicting_manifest_paths(
+    verification: ManifestVerification,
+) -> frozenset[Path]:
     paths = [
         path
         for reconciliation in verification.moves
@@ -199,7 +227,9 @@ def _identity_refusal(
     return RecoverySafetyReason.IDENTITY_UNVERIFIABLE
 
 
-def _required_safety_demonstrated(reconciliation: MoveReconciliation) -> bool:
+def _required_safety_demonstrated(
+    reconciliation: MoveReconciliation,
+) -> bool:
     source = reconciliation.source_observation
     destination = reconciliation.destination_observation
     return (
@@ -239,7 +269,9 @@ def _missing_safety_reason(
     return RecoverySafetyReason.HISTORICAL_STATE_AMBIGUOUS
 
 
-def _source_restoration_path_available(observation: CurrentPathObservation) -> bool:
+def _source_restoration_path_available(
+    observation: CurrentPathObservation,
+) -> bool:
     return (
         observation.status is PathObservationStatus.MISSING
         and observation.leaf_exists is False
@@ -262,14 +294,32 @@ def _destination_recovery_source_available(
 
 def _explanation(reason: RecoverySafetyReason) -> str:
     return {
-        RecoverySafetyReason.IDENTITY_UNVERIFIABLE: "historical identity evidence is insufficient for safe recovery",
-        RecoverySafetyReason.HISTORICAL_STATE_AMBIGUOUS: "historical or reconciled state is ambiguous for safe recovery",
+        RecoverySafetyReason.IDENTITY_UNVERIFIABLE: (
+            "historical identity evidence is insufficient for safe recovery"
+        ),
+        RecoverySafetyReason.HISTORICAL_STATE_AMBIGUOUS: (
+            "historical or reconciled state is ambiguous for safe recovery"
+        ),
         RecoverySafetyReason.SOURCE_CONFLICT: "original location is occupied",
-        RecoverySafetyReason.DESTINATION_MISSING: "current recovery source is missing",
-        RecoverySafetyReason.BOTH_PATHS_PRESENT: "original and final paths are both present",
-        RecoverySafetyReason.BOTH_PATHS_MISSING: "original and final paths are both missing",
-        RecoverySafetyReason.DESTINATION_CHANGED: "current recovery source does not match recorded identity evidence",
-        RecoverySafetyReason.UNSAFE_PATH: "a required path has unsafe topology or containment",
-        RecoverySafetyReason.UNSUPPORTED_FILE_TYPE: "a required filesystem object is unsupported",
-        RecoverySafetyReason.OBSERVATION_FAILED: "a required filesystem observation failed",
+        RecoverySafetyReason.DESTINATION_MISSING: (
+            "current recovery source is missing"
+        ),
+        RecoverySafetyReason.BOTH_PATHS_PRESENT: (
+            "original and final paths are both present"
+        ),
+        RecoverySafetyReason.BOTH_PATHS_MISSING: (
+            "original and final paths are both missing"
+        ),
+        RecoverySafetyReason.DESTINATION_CHANGED: (
+            "current recovery source does not match recorded identity evidence"
+        ),
+        RecoverySafetyReason.UNSAFE_PATH: (
+            "a required path has unsafe topology or containment"
+        ),
+        RecoverySafetyReason.UNSUPPORTED_FILE_TYPE: (
+            "a required filesystem object is unsupported"
+        ),
+        RecoverySafetyReason.OBSERVATION_FAILED: (
+            "a required filesystem observation failed"
+        ),
     }[reason]
