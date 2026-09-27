@@ -193,6 +193,37 @@ def _path_observation_status(observation: _Observation) -> PathObservationStatus
     return PathObservationStatus.NOT_OBSERVED
 
 
+def _state_for_presence(
+    status: MoveStatus,
+    source_exists: bool,
+    destination_exists: bool,
+) -> ReconciliationState:
+    states = {
+        MoveStatus.COMPLETED: {
+            (False, True): ReconciliationState.CONSISTENT,
+            (True, False): ReconciliationState.SOURCE_RESTORED,
+            (True, True): ReconciliationState.BOTH_PRESENT,
+            (False, False): ReconciliationState.BOTH_MISSING,
+        },
+        MoveStatus.FAILED: {
+            (True, False): ReconciliationState.CONSISTENT,
+            (False, True): ReconciliationState.UNEXPECTED_DESTINATION,
+            (True, True): ReconciliationState.BOTH_PRESENT,
+            (False, False): ReconciliationState.DESTINATION_MISSING,
+        },
+    }
+    default_states = {
+        (True, False): ReconciliationState.CONSISTENT,
+        (False, True): ReconciliationState.UNEXPECTED_DESTINATION,
+        (True, True): ReconciliationState.BOTH_PRESENT,
+        (False, False): ReconciliationState.BOTH_MISSING,
+    }
+    return states.get(status, default_states).get(
+        (source_exists, destination_exists),
+        ReconciliationState.INDETERMINATE,
+    )
+
+
 def _state(
     status: MoveStatus,
     source: _Observation,
@@ -204,29 +235,11 @@ def _state(
         return ReconciliationState.INDETERMINATE
     if status is MoveStatus.IN_PROGRESS:
         return ReconciliationState.INDETERMINATE
-    if status is MoveStatus.COMPLETED:
-        if not source.exists and destination.exists:
-            return ReconciliationState.CONSISTENT
-        if source.exists and not destination.exists:
-            return ReconciliationState.SOURCE_RESTORED
-        if source.exists:
-            return ReconciliationState.BOTH_PRESENT
-        return ReconciliationState.BOTH_MISSING
-    if status is MoveStatus.FAILED:
-        if source.exists and not destination.exists:
-            return ReconciliationState.CONSISTENT
-        if not source.exists and destination.exists:
-            return ReconciliationState.UNEXPECTED_DESTINATION
-        if source.exists:
-            return ReconciliationState.BOTH_PRESENT
-        return ReconciliationState.DESTINATION_MISSING
-    if source.exists and not destination.exists:
-        return ReconciliationState.CONSISTENT
-    if not source.exists and destination.exists:
-        return ReconciliationState.UNEXPECTED_DESTINATION
-    if source.exists:
-        return ReconciliationState.BOTH_PRESENT
-    return ReconciliationState.BOTH_MISSING
+    return _state_for_presence(
+        status,
+        source.exists,
+        destination.exists,
+    )
 
 
 def _identity(
