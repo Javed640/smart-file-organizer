@@ -4,6 +4,7 @@ import pytest
 
 import smart_file_organizer.content_planning as content_planning
 from smart_file_organizer.content_planning import (
+    PlanningOptions,
     build_organization_plan_inspecting_content,
     build_organization_plan_with_extracted_text,
 )
@@ -106,7 +107,7 @@ def test_build_organization_plan_with_extracted_text_uses_configured_rules() -> 
         [source],
         Path("organized"),
         extract_text=lambda _: "Notes from a demo course.",
-        semantic_rules=rules,
+        options=PlanningOptions(semantic_rules=rules),
     )
 
     assert plan[0].destination == Path("organized/learning/demo-course/notes.txt")

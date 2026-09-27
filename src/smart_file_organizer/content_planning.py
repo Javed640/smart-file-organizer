@@ -2,6 +2,7 @@
 
 import logging
 from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 from pathlib import Path
 
 from smart_file_organizer.config import DEFAULT_FALLBACK_FOLDER
@@ -24,6 +25,17 @@ logger = logging.getLogger(__name__)
 DocumentTextExtractor = Callable[[Path], str]
 
 
+@dataclass(frozen=True)
+class PlanningOptions:
+    """Configuration options for content-aware planning."""
+
+    semantic_rules: Iterable[SemanticFolderRule] | None = None
+    fallback_folder: str | None = DEFAULT_FALLBACK_FOLDER
+    rule_precedence: RulePrecedence = "builtins-first"
+    disabled_builtin_rules: Iterable[str] = ()
+    taxonomy_profile: TaxonomyProfileName = TaxonomyProfileName.PERSONAL_IT
+
+
 def inspect_document_text(
     path: Path,
     *,
@@ -44,13 +56,10 @@ def build_organization_plan_with_extracted_text(
     target_root: Path,
     *,
     extract_text: DocumentTextExtractor,
-    semantic_rules: Iterable[SemanticFolderRule] | None = None,
-    fallback_folder: str | None = DEFAULT_FALLBACK_FOLDER,
-    rule_precedence: RulePrecedence = "builtins-first",
-    disabled_builtin_rules: Iterable[str] = (),
-    taxonomy_profile: TaxonomyProfileName = TaxonomyProfileName.PERSONAL_IT,
+    options: PlanningOptions | None = None,
 ) -> list[PlannedMove]:
     """Build move plans using an injected text extractor."""
+    options = options or PlanningOptions()
     source_list = list(sources)
     document_texts = {source: extract_text(source) for source in source_list}
 
@@ -58,11 +67,11 @@ def build_organization_plan_with_extracted_text(
         source_list,
         target_root,
         document_texts,
-        semantic_rules=semantic_rules,
-        fallback_folder=fallback_folder,
-        rule_precedence=rule_precedence,
-        disabled_builtin_rules=disabled_builtin_rules,
-        taxonomy_profile=taxonomy_profile,
+        semantic_rules=options.semantic_rules,
+        fallback_folder=options.fallback_folder,
+        rule_precedence=options.rule_precedence,
+        disabled_builtin_rules=options.disabled_builtin_rules,
+        taxonomy_profile=options.taxonomy_profile,
     )
 
 
@@ -70,14 +79,11 @@ def build_organization_plan_inspecting_content(
     sources: Iterable[Path],
     target_root: Path,
     *,
-    semantic_rules: Iterable[SemanticFolderRule] | None = None,
-    fallback_folder: str | None = DEFAULT_FALLBACK_FOLDER,
-    rule_precedence: RulePrecedence = "builtins-first",
-    disabled_builtin_rules: Iterable[str] = (),
-    taxonomy_profile: TaxonomyProfileName = TaxonomyProfileName.PERSONAL_IT,
+    options: PlanningOptions | None = None,
     verbose: bool = False,
 ) -> list[PlannedMove]:
     """Build plans with safe inspection and filename fallback."""
+    options = options or PlanningOptions()
     source_list = list(sources)
     document_texts: dict[Path, str] = {}
 
@@ -120,9 +126,9 @@ def build_organization_plan_inspecting_content(
         source_list,
         target_root,
         document_texts,
-        semantic_rules=semantic_rules,
-        fallback_folder=fallback_folder,
-        rule_precedence=rule_precedence,
-        disabled_builtin_rules=disabled_builtin_rules,
-        taxonomy_profile=taxonomy_profile,
+        semantic_rules=options.semantic_rules,
+        fallback_folder=options.fallback_folder,
+        rule_precedence=options.rule_precedence,
+        disabled_builtin_rules=options.disabled_builtin_rules,
+        taxonomy_profile=options.taxonomy_profile,
     )
